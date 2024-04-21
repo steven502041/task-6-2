@@ -1,15 +1,12 @@
-# Sample workflow to access AWS resources when workflow is tied to branch
-# The workflow Creates static website using aws s3
-name: AWS example workflow
+name: Configuring OpenID Connect in Amazon Web Services
 on:
   push
 env:
   BUCKET_NAME : "task-6-2"
   AWS_REGION : "ap-northeast-1"
-# permission can be added at job level or workflow level
 permissions:
-  id-token: write   # This is required for requesting the JWT
-  contents: read    # This is required for actions/checkout
+  id-token: write
+  contents: read
 jobs:
   S3PackageUpload:
     runs-on: ubuntu-latest

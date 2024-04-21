@@ -30,13 +30,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Init Terraform
+      - name: Terraform Init
         run: terraform init
 
-      - name: Validate_Terraform
+      - name: Terraform Validate
         run: terraform validate
 
-      - name: Plan_Terraform
+      - name: Terraform Plan
         run: terraform plan
 
   terraform_apply:
@@ -53,11 +53,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Init Terraform
+      - name: Terraform Init
         run: terraform init
+
       - name: Terraform Apply
         run: |
           terraform apply -auto-approve
+
       - name: Save Terraform Output
         id: ec2_ip
         run: |
