@@ -1,0 +1,82 @@
+name: Terraform apply
+
+on:
+  workflow_dispatch:
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+jobs:
+  notify-discord:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send workflow URL to Discord
+        run: |
+          curl -H "Content-Type: application/json" \
+          -X POST \
+          -d '{"content": "Terraform Apply 準備! 請協助 Approve: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}' \
+          ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+  terraform_plan:
+    needs: notify-discord
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    defaults:
+      run:
+        working-directory: src
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Init Terraform
+        run: terraform init
+
+      - name: Validate_Terraform
+        run: terraform validate
+
+      - name: Plan_Terraform
+        run: terraform plan
+
+  terraform_apply:
+    environment: production
+    needs: terraform_plan
+    runs-on: ubuntu-latest
+    outputs:
+      ec2_ip: ${{ steps.ec2_ip.outputs.instance_ip }}
+      output1: ${{ steps.ec2_ip.outputs.test }}
+    defaults:
+      run:
+        working-directory: src
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Init Terraform
+        run: terraform init
+      - name: Terraform Apply
+        run: |
+          terraform apply -auto-approve
+      - name: Save Terraform Output
+        id: ec2_ip
+        run: |
+          instance_ip=$(terraform output -raw INSTANCE_IP)
+          echo "instance_ip=$instance_ip" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: terraform_apply
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Deploy
+        env:
+          PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          HOSTNAME: ${{needs.terraform_apply.outputs.ec2_ip}}
+          USER_NAME: ${{secrets.EC2_USER}}
+        run: |
+          echo "$PRIVATE_KEY" > private_key && chmod 400 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
+            touch ${{ github.run_id }}
+          '
