@@ -8,13 +8,11 @@ on:
   #   - 'src/*'
 
 env:
-  # verbosity setting for Terraform logs
+  # Terraform 日誌詳細程度設定
   TF_LOG: INFO
-  # Credentials for deployment to AWS
+  # 部署到 AWS 的認證憑證
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  # S3 bucket for the Terraform state
-  BUCKET_TF_STATE: ${{ secrets.BUCKET_TF_STATE }}
 
 jobs:
   terraform_validate:
@@ -22,22 +20,17 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: ./src  # We keep Terraform files in the terraform directory.
-
+        working-directory: ./src
     steps:
       - name: Checkout the repository to the runner
+
         uses: actions/checkout@v4
 
       - uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform init
-        id: init
-        run: terraform init -backend-config="bucket=$BUCKET_TF_STATE"
+      - run: terraform fmt
 
-      - name: Terraform fmt
-        id: fmt
-        run: terraform fmt -check
-        continue-on-error: true
+      - run: terraform init
 
       - name: Terraform Validate
         id: validate
