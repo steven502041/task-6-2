@@ -1,0 +1,31 @@
+name: Push Check Terraform Validate
+
+on:
+  push:
+    branches:
+      - '**'
+#    paths:
+#      - 'src/**'
+
+jobs:
+  terraform_validate:
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    defaults:
+      run:
+        working-directory: src
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform with specified version on the runner
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform init
+        id: init
+        run: terraform init
+
+      - name: Validate Terraform
+        run: terraform validate
