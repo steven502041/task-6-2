@@ -5,7 +5,7 @@ on:
     branches:
       - '**'
 #    paths:
- #     - 'src/**'
+#     - 'src/**'
 
 jobs:
   terraform_plan:
