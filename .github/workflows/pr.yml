@@ -5,7 +5,7 @@ on:
     branches:
       - '**'
     #paths:
-    #  - 'src/**'
+      #- 'src/**'
 
 jobs:
   terraform_plan:
@@ -13,6 +13,8 @@ jobs:
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    permissions:
+      pull-requests: write
     defaults:
       run:
         working-directory: src
@@ -40,7 +42,5 @@ jobs:
 
       - name: Upload Plan Output as PR Comment
         uses: mshick/add-pr-comment@v2
-        permissions:
-          pull-requests: write
         with:
           message-path: ${{ github.workspace }}/src/plan.txt
