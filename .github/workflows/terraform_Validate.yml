@@ -8,29 +8,31 @@ on:
   #   - 'src/*'
 
 env:
-  # Terraform 日誌詳細程度設定
   TF_LOG: INFO
-  # 部署到 AWS 的認證憑證
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
 jobs:
   terraform_validate:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: ./src
+
     steps:
       - name: Checkout the repository to the runner
-
         uses: actions/checkout@v4
 
-      - uses: hashicorp/setup-terraform@v3
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
 
-      - run: terraform fmt
+      - name: Terraform Init
+        uses: hashicorp/terraform-github-actions/init@v0.4.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          TF_ACTION_WORKING_DIR: 'terraform'
 
-      - run: terraform init
+      - name: Terraform fmt
+        id: fmt
+        run: terraform fmt -check
+        continue-on-error: true
 
       - name: Terraform Validate
         id: validate
