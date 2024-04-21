@@ -7,17 +7,22 @@ on:
   # paths:
   #   - 'src/*'
 
+env:
+  # verbosity setting for Terraform logs
+  TF_LOG: INFO
+  # Credentials for deployment to AWS
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  # S3 bucket for the Terraform state
+  BUCKET_TF_STATE: ${{ secrets.BUCKET_TF_STATE }}
+
 jobs:
   terraform_validate:
     runs-on: ubuntu-latest
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
     defaults:
       run:
         shell: bash
-        working-directory: src  # We keep Terraform files in the terraform directory.
+        working-directory: ./src  # We keep Terraform files in the terraform directory.
 
     steps:
       - name: Checkout the repository to the runner
@@ -25,19 +30,15 @@ jobs:
 
       - uses: hashicorp/setup-terraform@v3
 
+      - name: Terraform init
+        id: init
+        run: terraform init -backend-config="bucket=$BUCKET_TF_STATE"
+
       - name: Terraform fmt
         id: fmt
         run: terraform fmt -check
         continue-on-error: true
 
-      - name: Terraform init
-        id: init
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-          TF_ACTION_WORKING_DIR: 'terraform'
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
       - name: Terraform Validate
         id: validate
-        run: terraform validate -no-color
+        run: terraform validate
