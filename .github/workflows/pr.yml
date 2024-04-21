@@ -4,8 +4,8 @@ on:
   pull_request:
     branches:
       - '**'
-    paths:
-      - 'src/**'
+#    paths:
+ #     - 'src/**'
 
 jobs:
   terraform_plan:
