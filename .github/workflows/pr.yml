@@ -7,7 +7,28 @@ on:
     #paths:
     #  - 'src/**'
 
+env:
+  BUCKET_NAME: "task-6-2"
+  AWS_REGION: "ap-northeast-1"
+
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
+  S3PackageUpload:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::218138280714:role/GitHub-task-6-2
+          role-session-name: task-6-2
+          aws-region: ${{ env.AWS_REGION }}
+          output-credentials: true
+
   PR_Check:
     runs-on: ubuntu-latest
     permissions:

@@ -1,18 +1,26 @@
-name: Terraform apply
+name: Terraform Apply Workflow
 
 on:
   workflow_dispatch:
 
-env:
-  BUCKET_NAME : "task-6-2"
-  AWS_REGION : "ap-northeast-1"
-permissions:
-  id-token: write
-  contents: read
-
-
 jobs:
+  configure_aws:
+    name: Configure AWS Credentials
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::218138280714:role/GitHub-task-6-2
+          role-session-name: task-6-2
+          aws-region: ${{ env.AWS_REGION }}
+          output-credentials: true
+
   notify-discord:
+    name: Notify Discord
     runs-on: ubuntu-latest
     steps:
       - name: Send workflow URL to Discord
@@ -23,13 +31,11 @@ jobs:
           ${{ secrets.DISCORD_WEBHOOK_URL }}
 
   terraform_plan:
-    needs: notify-discord
+    name: Terraform Plan
     runs-on: ubuntu-latest
+    needs: [configure_aws, notify-discord]
     permissions:
       pull-requests: write
-    defaults:
-      run:
-        working-directory: src
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -44,15 +50,12 @@ jobs:
         run: terraform plan
 
   terraform_apply:
-    environment: production
-    needs: terraform_plan
+    name: Terraform Apply
     runs-on: ubuntu-latest
+    needs: terraform_plan
     outputs:
       ec2_ip: ${{ steps.ec2_ip.outputs.instance_ip }}
       output1: ${{ steps.ec2_ip.outputs.test }}
-    defaults:
-      run:
-        working-directory: src
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -71,12 +74,14 @@ jobs:
           echo "instance_ip=$instance_ip" >> "$GITHUB_OUTPUT"
 
   deploy:
-    needs: terraform_apply
+    name: Deploy
     runs-on: ubuntu-latest
+    needs: terraform_apply
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Deploy
+
+      - name: Deploy to EC2
         env:
           PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           HOSTNAME: ${{needs.terraform_apply.outputs.ec2_ip}}
