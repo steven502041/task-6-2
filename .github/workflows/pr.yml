@@ -44,4 +44,5 @@ jobs:
       - name: Upload Plan Output as PR Comment
         uses: mshick/add-pr-comment@v2
         with:
-          message-path: ${{ github.workspace }}/src/plan.txt
+          message-path: |
+            ${{ github.workspace }}/src/plan.txt
