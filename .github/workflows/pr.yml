@@ -19,9 +19,6 @@ jobs:
       run:
         working-directory: src
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
       - name: Setup Terraform with specified version on the runner
         uses: hashicorp/setup-terraform@v2
 
