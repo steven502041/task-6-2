@@ -14,6 +14,11 @@ env:
 permissions:
   id-token: write
   contents: read
+  pull-requests: write
+
+defaults:
+  run:
+    working-directory: src
 
 jobs:
   OIDC_Auth:
@@ -21,6 +26,7 @@ jobs:
     steps:
       - name: Git clone the repository
         uses: actions/checkout@v4
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -29,14 +35,6 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           output-credentials: true
 
-  PR_Check:
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-    defaults:
-      run:
-        working-directory: src
-    steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -57,8 +55,8 @@ jobs:
         id: showplan
         run: |
           terraform plan -no-color > plan.txt
+
       - name: Upload Plan Output as PR Comment
         uses: mshick/add-pr-comment@v2
         with:
-          message-path: |
-            ${{ github.workspace }}/src/plan.txt
+          message-path: ${{ github.workspace }}/src/plan.txt
