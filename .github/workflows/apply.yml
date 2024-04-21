@@ -4,8 +4,12 @@ on:
   workflow_dispatch:
 
 env:
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  BUCKET_NAME : "task-6-2"
+  AWS_REGION : "ap-northeast-1"
+permissions:
+  id-token: write
+  contents: read
+
 
 jobs:
   notify-discord:
