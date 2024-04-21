@@ -16,10 +16,6 @@ permissions:
   contents: read
   pull-requests: write
 
-defaults:
-  run:
-    working-directory: src
-
 jobs:
   OIDC_Auth:
     runs-on: ubuntu-latest
@@ -35,6 +31,13 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           output-credentials: true
 
+  terraform_plan:
+    needs: OIDC_Auth
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src
+    steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
