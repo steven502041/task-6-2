@@ -7,8 +7,12 @@ on:
     # paths:
     #   - 'src/**'
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
-  OIDC_Auth:
+  configure_aws:
     name: Configure AWS Credentials
     runs-on: ubuntu-latest
     steps:
@@ -37,5 +41,8 @@ jobs:
         id: init
         run: terraform init
 
-      - name: Validate Terraform
+      - name: Terraform Validate
         run: terraform validate
+
+      - name: Terraform plan
+        run: terraform plan
