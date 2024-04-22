@@ -13,10 +13,6 @@ permissions:
   id-token: write
   contents: read
 
-defaults:
-  run:
-    working-directory: src
-
 jobs:
   OIDC_Auth:
     name: Configure AWS Credentials
@@ -48,18 +44,22 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
 
-      - name: Terraform Init
-        run: terraform init
+    defaults:
+      run:
+        working-directory: src
+        steps:
+          - name: Checkout code
+            uses: actions/checkout@v4
 
-      - name: Terraform Validate
-        run: terraform validate
+          - name: Terraform Init
+            run: terraform init
 
-      - name: Terraform Plan
-        run: terraform plan
+          - name: Terraform Validate
+            run: terraform validate
+
+          - name: Terraform Plan
+            run: terraform plan
 
   terraform_apply:
     environment: production
@@ -90,7 +90,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Deploy
         env:
