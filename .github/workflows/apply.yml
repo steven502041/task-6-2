@@ -3,7 +3,22 @@ name: Terraform apply
 on:
   workflow_dispatch:
 
-OIDC_Auth:
+env:
+  BUCKET_NAME: "task-6-2"
+  AWS_REGION: "ap-northeast-1"
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+permissions:
+  id-token: write
+  contents: read
+
+defaults:
+  run:
+    working-directory: src
+
+jobs:
+  OIDC_Auth:
     name: Configure AWS Credentials
     runs-on: ubuntu-latest
     steps:
@@ -18,7 +33,6 @@ OIDC_Auth:
           aws-region: ${{ env.AWS_REGION }}
           output-credentials: true
 
-jobs:
   notify-discord:
     runs-on: ubuntu-latest
     steps:
@@ -34,9 +48,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
-    defaults:
-      run:
-        working-directory: src
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -57,9 +68,6 @@ jobs:
     outputs:
       ec2_ip: ${{ steps.ec2_ip.outputs.instance_ip }}
       output1: ${{ steps.ec2_ip.outputs.test }}
-    defaults:
-      run:
-        working-directory: src
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -83,11 +91,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
       - name: Deploy
         env:
           PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          HOSTNAME: ${{needs.terraform_apply.outputs.ec2_ip}}
-          USER_NAME: ${{secrets.EC2_USER}}
+          HOSTNAME: ${{ needs.terraform_apply.outputs.ec2_ip }}
+          USER_NAME: ${{ secrets.EC2_USER }}
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 400 private_key
           ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
