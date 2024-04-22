@@ -17,7 +17,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  OIDC_Auth&terraform_plan:
+  terraform_plan:
     runs-on: ubuntu-latest
     defaults:
       run:
