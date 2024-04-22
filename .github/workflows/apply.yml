@@ -83,21 +83,3 @@ jobs:
         run: |
           instance_ip=$(terraform output -raw INSTANCE_IP)
           echo "instance_ip=$instance_ip" >> "$GITHUB_OUTPUT"
-
-deploy:
-  needs: terraform_apply
-  runs-on: ubuntu-latest
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Deploy
-      env:
-        PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        HOSTNAME: ${{ needs.terraform_apply.outputs.ec2_ip }}
-        USER_NAME: ${{ secrets.EC2_USER }}
-      run: |
-        echo "$PRIVATE_KEY" > private_key && chmod 400 private_key
-        ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
-          touch ${{ github.run_id }}
-        '
