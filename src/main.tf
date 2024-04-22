@@ -14,11 +14,11 @@ provider "aws" {
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
-  name             = "task-6-1-vpc"
-  cidr             = "10.0.0.0/20"
-  azs              = ["ap-northeast-1a", "ap-northeast-1c"]
-  private_subnets  = ["10.0.1.0/24"]
-  public_subnets   = ["10.0.0.0/24"]
+  name                    = "task-6-1-vpc"
+  cidr                    = "10.0.0.0/20"
+  azs                     = ["ap-northeast-1a", "ap-northeast-1c"]
+  private_subnets         = ["10.0.1.0/24"]
+  public_subnets          = ["10.0.0.0/24"]
   enable_nat_gateway      = true
   single_nat_gateway      = true
   map_public_ip_on_launch = true
