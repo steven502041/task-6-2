@@ -7,6 +7,14 @@ on:
 #    paths:
 #      - 'src/**'
 
+env:
+  BUCKET_NAME: "task-6-2"
+  AWS_REGION: "ap-northeast-1"
+
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   terraform_validate:
     runs-on: ubuntu-latest
@@ -24,9 +32,6 @@ jobs:
           role-session-name: task-6-2
           aws-region: ${{ env.AWS_REGION }}
           output-credentials: true
-
-      - name: Checkout code
-        uses: actions/checkout@v4
 
       - name: Setup Terraform with specified version on the runner
         uses: hashicorp/setup-terraform@v2
