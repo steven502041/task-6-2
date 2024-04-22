@@ -34,7 +34,6 @@ jobs:
           output-credentials: true
 
   notify-discord:
-    runs-on: ubuntu-latest
     steps:
       - name: Send workflow URL to Discord
         run: |
