@@ -17,8 +17,11 @@ permissions:
   pull-requests: write
 
 jobs:
-  OIDC_Auth:
+  OIDC_Auth&terraform_plan:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src
     steps:
       - name: Git clone the repository
         uses: actions/checkout@v4
@@ -30,19 +33,6 @@ jobs:
           role-session-name: task-6-2
           aws-region: ${{ env.AWS_REGION }}
           output-credentials: true
-
-  terraform_plan:
-    needs: OIDC_Auth
-    runs-on: ubuntu-latest
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    defaults:
-      run:
-        working-directory: src
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
 
       - name: Setup Terraform with specified version on the runner
         uses: hashicorp/setup-terraform@v2

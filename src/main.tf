@@ -46,22 +46,6 @@ resource "aws_security_group" "allow-ssh" {
   }
 }
 
-resource "tls_private_key" "ec2_ssh_key" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-
-resource "aws_key_pair" "ec2_key_pair" {
-  key_name   = "ec2-ssh-key"
-  public_key = tls_private_key.ec2_ssh_key.public_key_openssh
-}
-
-resource "local_file" "ec2_private_key" {
-  content         = tls_private_key.ec2_ssh_key.private_key_pem
-  filename        = "ec2-ssh-key.pem"
-  file_permission = "400"
-}
-
 module "ubuntu_22_04_latest" {
   source = "github.com/andreswebs/terraform-aws-ami-ubuntu"
 }
