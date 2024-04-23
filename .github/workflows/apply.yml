@@ -1,4 +1,4 @@
-name: Terraform apply
+name: Deploy
 
 on:
   workflow_dispatch:
@@ -10,6 +10,7 @@ env:
 permissions:
   id-token: write
   contents: read
+  pull-requests: write
 
 jobs:
   notify-discord:
@@ -23,10 +24,7 @@ jobs:
             ${{ secrets.DISCORD_WEBHOOK_URL }}
 
   terraform_plan:
-    needs: notify-discord
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
     defaults:
       run:
         working-directory: src
