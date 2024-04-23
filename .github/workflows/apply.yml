@@ -17,6 +17,17 @@ defaults:
     working-directory: src
 
 jobs:
+  notify_discord:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    steps:
+      - name: Send workflow URL to Discord
+        run: |
+          curl -H "Content-Type: application/json" \
+            -X POST \
+            -d '{"content": "Terraform Apply 準備! 請協助 Approve: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}' \
+            ${{ secrets.DISCORD_WEBHOOK_URL }}
+
   terraform_apply:
     runs-on: ubuntu-latest
     environment: production
@@ -27,13 +38,6 @@ jobs:
           role-to-assume: arn:aws:iam::218138280714:role/task-6-2-role
           aws-region: ${{ env.AWS_REGION }}
           output-credentials: true
-
-      - name: Send workflow URL to Discord
-        run: |
-          curl -H "Content-Type: application/json" \
-            -X POST \
-            -d '{"content": "Terraform Apply 準備! 請協助 Approve: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}' \
-            ${{ secrets.DISCORD_WEBHOOK_URL }}
 
       - name: Git clone the repository
         uses: actions/checkout@v4
