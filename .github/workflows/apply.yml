@@ -19,7 +19,6 @@ defaults:
 jobs:
   notify_discord:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'workflow_dispatch' }}
     steps:
       - name: Send workflow URL to Discord
         run: |
