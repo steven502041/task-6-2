@@ -46,20 +46,10 @@ resource "aws_security_group" "allow-ssh" {
   }
 }
 
-resource "tls_private_key" "ec2_ssh_key" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-
-resource "aws_key_pair" "ec2_key_pair" {
-  key_name   = "ec2-ssh-key"
-  public_key = tls_private_key.ec2_ssh_key.public_key_openssh
-}
-
-resource "local_file" "ec2_private_key" {
-  content         = tls_private_key.ec2_ssh_key.private_key_pem
-  filename        = "ec2-ssh-key.pem"
-  file_permission = "400"
+variable "ssh_key_name" {
+  description = "Your SSH key name"
+  type        = string
+  default     = "remote"
 }
 
 module "ubuntu_22_04_latest" {
@@ -73,7 +63,7 @@ locals {
 resource "aws_instance" "task-6-2" {
   ami                    = local.ami_id
   instance_type          = "t2.micro"
-  key_name               = aws_key_pair.ec2_key_pair.key_name
+  key_name               = var.ssh_key_name
   subnet_id              = module.vpc.public_subnets[0]
   vpc_security_group_ids = [aws_security_group.allow-ssh.id]
 
