@@ -10,14 +10,9 @@ env:
 permissions:
   id-token: write
   contents: read
-  pull-requests: write
-
-defaults:
-  run:
-    working-directory: src
 
 jobs:
-  notify_discord:
+  notify-discord:
     runs-on: ubuntu-latest
     steps:
       - name: Send workflow URL to Discord
@@ -27,22 +22,24 @@ jobs:
             -d '{"content": "Terraform Apply 準備! 請協助 Approve: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}' \
             ${{ secrets.DISCORD_WEBHOOK_URL }}
 
-  terraform_apply:
+  terraform_plan:
+    needs: notify-discord
     runs-on: ubuntu-latest
-    environment: production
+    permissions:
+      pull-requests: write
+    defaults:
+      run:
+        working-directory: src
     steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v4
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::218138280714:role/task-6-2-role
           aws-region: ${{ env.AWS_REGION }}
           output-credentials: true
-
-      - name: Git clone the repository
-        uses: actions/checkout@v4
-
-      - name: Setup Terraform with specified version on the runner
-        uses: hashicorp/setup-terraform@v2
 
       - name: Terraform Init
         run: terraform init
@@ -52,6 +49,27 @@ jobs:
 
       - name: Terraform Plan
         run: terraform plan
+
+  terraform_apply:
+    environment: production
+    needs: terraform_plan
+    runs-on: ubuntu-latest
+    outputs:
+      ec2_ip: ${{ steps.ec2_ip.outputs.instance_ip }}
+      output1: ${{ steps.ec2_ip.outputs.test }}
+    steps:
+      - name: Git clone the repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::218138280714:role/task-6-2-role
+          aws-region: ${{ env.AWS_REGION }}
+          output-credentials: true
+
+      - name: Terraform Init
+        run: terraform init
 
       - name: Terraform Apply
         run: terraform apply -auto-approve
