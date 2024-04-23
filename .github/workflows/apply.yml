@@ -55,6 +55,9 @@ jobs:
     environment: production
     needs: terraform_plan
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src
     outputs:
       ec2_ip: ${{ steps.ec2_ip.outputs.instance_ip }}
       output1: ${{ steps.ec2_ip.outputs.test }}
