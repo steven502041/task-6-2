@@ -1,11 +1,7 @@
-name: PR Check And Plan
+name: Terraform apply
 
 on:
-  pull_request:
-    branches:
-      - '**'
-    #paths:
-    #  - 'src/**'
+  workflow_dispatch:
 
 env:
   BUCKET_NAME: "task-6-2"
@@ -17,7 +13,18 @@ permissions:
   pull-requests: write
 
 jobs:
+  notify-discord:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send workflow URL to Discord
+        run: |
+          curl -H "Content-Type: application/json" \
+            -X POST \
+            -d '{"content": "Terraform Apply 準備! 請協助 Approve: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}' \
+            ${{ secrets.DISCORD_WEBHOOK_URL }}
+
   terraform_plan:
+    needs: notify-discord
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -36,22 +43,29 @@ jobs:
       - name: Setup Terraform with specified version on the runner
         uses: hashicorp/setup-terraform@v2
 
-      - name: Terraform init
-        id: init
+      - name: Terraform Init
         run: terraform init
+        id: terraform_init
 
       - name: Terraform Validate
         run: terraform validate
 
-      - name: Terraform plan
+      - name: Terraform Plan
         run: terraform plan
 
-      - name: Show Plan
-        id: showplan
-        run: |
-          terraform plan -no-color > plan.txt
+  terraform_apply:
+    environment: production
+    needs: terraform_plan
+    runs-on: ubuntu-latest
+    outputs:
+      ec2_ip: ${{ steps.ec2_ip.outputs.instance_ip }}
+      output1: ${{ steps.ec2_ip.outputs.test }}
+    steps:
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
 
-      - name: Upload Plan Output as PR Comment
-        uses: mshick/add-pr-comment@v2
-        with:
-          message-path: ${{ github.workspace }}/src/plan.txt
+      - name: Save Terraform Output
+        id: ec2_ip
+        run: |
+          instance_ip=$(terraform output -raw INSTANCE_IP)
+          echo "instance_ip=$instance_ip" >> "$GITHUB_OUTPUT"
