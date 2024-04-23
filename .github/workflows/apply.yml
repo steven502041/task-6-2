@@ -18,11 +18,10 @@ defaults:
 
 jobs:
   terraform_apply:
-    name: Terraform Apply
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - name: Checkout code
+      - name: Git clone the repository
         uses: actions/checkout@v4
 
       - name: Configure AWS credentials
@@ -38,6 +37,9 @@ jobs:
             -X POST \
             -d '{"content": "Terraform Apply 準備! 請協助 Approve: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}' \
             ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+      - name: Setup Terraform with specified version on the runner
+        uses: hashicorp/setup-terraform@v2
 
       - name: Terraform Init
         run: terraform init
@@ -57,7 +59,6 @@ jobs:
         run: |
           instance_ip=$(terraform output -raw INSTANCE_IP)
           echo "instance_ip=$instance_ip" >> "$GITHUB_OUTPUT"
-
         outputs:
           ec2_ip: ${{ steps.ec2_ip.outputs.instance_ip }}
           output1: ${{ steps.ec2_ip.outputs.test }}
