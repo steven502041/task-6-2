@@ -12,6 +12,10 @@ permissions:
   contents: read
   pull-requests: write
 
+defaults:
+  run:
+    working-directory: src
+
 jobs:
   notify-discord:
     runs-on: ubuntu-latest
@@ -26,9 +30,6 @@ jobs:
   terraform_plan:
     needs: notify-discord
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: src
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
