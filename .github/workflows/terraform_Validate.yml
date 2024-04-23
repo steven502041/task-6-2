@@ -28,7 +28,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::218138280714:role/GitHub-task-6-2
+          role-to-assume: arn:aws:iam::218138280714:role/task-6-2-role
           role-session-name: task-6-2
           aws-region: ${{ env.AWS_REGION }}
           output-credentials: true
