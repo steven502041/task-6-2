@@ -30,11 +30,11 @@ jobs:
     defaults:
       run:
         working-directory: src
+
     steps:
       - name: Git clone the repository
         uses: actions/checkout@v4
-
-      - name: Configure AWS credentials
+      - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::218138280714:role/task-6-2-role
