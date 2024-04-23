@@ -20,13 +20,6 @@ jobs:
   notify_discord:
     runs-on: ubuntu-latest
     steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::218138280714:role/task-6-2-role
-          aws-region: ${{ env.AWS_REGION }}
-          output-credentials: true
-
       - name: Send workflow URL to Discord
         run: |
           curl -H "Content-Type: application/json" \
@@ -61,8 +54,7 @@ jobs:
         run: terraform plan
 
       - name: Terraform Apply
-        run: |
-          terraform apply -auto-approve
+        run: terraform apply -auto-approve
 
       - name: Save Terraform Output
         id: ec2_ip
