@@ -90,5 +90,5 @@ jobs:
       - name: Save Terraform Output
         id: ec2_ip
         run: |
-          instance_ip=$(terraform output -raw INSTANCE_IP)
+          instance_ip=$(terraform output -raw public_ip)
           echo "instance_ip=$instance_ip" >> "$GITHUB_OUTPUT"
